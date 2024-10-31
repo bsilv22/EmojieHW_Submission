@@ -1,5 +1,6 @@
 package edu.farmingdale.datastoredemo.ui
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -63,3 +64,14 @@ data class EmojiReleaseUiState(
     val toggleIcon: Int =
         if (isLinearLayout) R.drawable.ic_grid_layout else R.drawable.ic_linear_layout
 )
+
+class ThemeViewModel : ViewModel() {
+    // State variable to track the current theme
+    var isDarkTheme = mutableStateOf(false)
+        private set
+
+    // Function to toggle the theme
+    fun toggleTheme() {
+        isDarkTheme.value = !isDarkTheme.value
+    }
+}
