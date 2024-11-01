@@ -46,6 +46,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.farmingdale.datastoredemo.R
 import edu.farmingdale.datastoredemo.data.local.LocalEmojiData
 import androidx.compose.material3.Switch
+import androidx.compose.runtime.getValue
+import edu.farmingdale.datastoredemo.ui.ThemeViewModel
+import edu.farmingdale.datastoredemo.ui.theme.DataStoreDemoTheme
 
 /*
  * Screen level composable
@@ -54,50 +57,49 @@ import androidx.compose.material3.Switch
 fun EmojiReleaseApp(
     emojiViewModel: EmojiScreenViewModel = viewModel(
         factory = EmojiScreenViewModel.Factory
-    )
+    ),
+    themeViewModel: ThemeViewModel = viewModel()  // Initialize ThemeViewModel here
 ) {
-    EmojiScreen(
-        uiState = emojiViewModel.uiState.collectAsState().value,
-        selectLayout = emojiViewModel::selectLayout,
-    )
+    // Observe the theme preference from ThemeViewModel
+    val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+
+    DataStoreDemoTheme(darkTheme = isDarkTheme) {   // Pass isDarkTheme to DataStoreDemoTheme
+        EmojiScreen(
+            uiState = emojiViewModel.uiState.collectAsState().value,
+            selectLayout = emojiViewModel::selectLayout,
+            themeViewModel = themeViewModel
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EmojiScreen(
     uiState: EmojiReleaseUiState,
-    selectLayout: (Boolean) -> Unit
-
+    selectLayout: (Boolean) -> Unit,
+    themeViewModel: ThemeViewModel
 ) {
-    val themeViewModel: ThemeViewModel = viewModel()
+    // Collect the theme state from the ViewModel
+    val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+
     val isLinearLayout = uiState.isLinearLayout
     Scaffold(
         topBar = {
             TopAppBar(
-
-
-
                 title = { Text(stringResource(R.string.top_bar_name)) },
                 actions = {
-
+                    // Toggle switch for dark theme
                     Switch(
-                        checked = themeViewModel.isDarkTheme.value,
-                        onCheckedChange = {
-                            themeViewModel.toggleTheme()
-                        },
+                        checked = isDarkTheme,
+                        onCheckedChange = { themeViewModel.toggleTheme() },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.secondary,
                             uncheckedThumbColor = MaterialTheme.colorScheme.onBackground
                         )
-
                     )
 
-
-
                     IconButton(
-                        onClick = {
-                            selectLayout(!isLinearLayout)
-                        }
+                        onClick = { selectLayout(!isLinearLayout) }
                     ) {
                         Icon(
                             painter = painterResource(uiState.toggleIcon),
@@ -105,8 +107,6 @@ private fun EmojiScreen(
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
-
-
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.inversePrimary
@@ -196,7 +196,8 @@ fun EmojiReleaseGridLayout(
                 modifier = Modifier
                     .height(110.dp)
                     .clickable {
-                        Toast.makeText(cntxt, "Emoji clicked: $e", Toast.LENGTH_SHORT).show()
+                        val description = LocalEmojiData.EmojiDescriptions[e] ?: "Unknown Emoji"
+                        Toast.makeText(cntxt, description, Toast.LENGTH_SHORT).show()
                     },
                 shape = MaterialTheme.shapes.medium
             ) {

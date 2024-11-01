@@ -10,12 +10,13 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import edu.farmingdale.datastoredemo.R
 import edu.farmingdale.datastoredemo.EmojiReleaseApplication
 import edu.farmingdale.datastoredemo.data.local.UserPreferencesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
 
 class EmojiScreenViewModel(
     private val userPreferencesRepository: UserPreferencesRepository
@@ -65,13 +66,12 @@ data class EmojiReleaseUiState(
         if (isLinearLayout) R.drawable.ic_grid_layout else R.drawable.ic_linear_layout
 )
 
-class ThemeViewModel : ViewModel() {
-    // State variable to track the current theme
-    var isDarkTheme = mutableStateOf(false)
-        private set
 
-    // Function to toggle the theme
+class ThemeViewModel : ViewModel() {
+    private val _isDarkTheme = MutableStateFlow(false)  // Internal state
+    val isDarkTheme = _isDarkTheme.asStateFlow()        // Expose read-only StateFlow
+
     fun toggleTheme() {
-        isDarkTheme.value = !isDarkTheme.value
+        _isDarkTheme.value = !_isDarkTheme.value
     }
 }
